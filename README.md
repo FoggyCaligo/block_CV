@@ -80,3 +80,7 @@ VITE_APP_NAME=블록형 이력서 관리기
 
 현재는 상단/하단만 쓰는 계획을 반영해 `AdSlot.vue` 컴포넌트를 만들어 두었습니다.
 실제 배포 시 애드센스 스크립트와 슬롯 코드를 해당 컴포넌트로 교체하면 됩니다.
+
+
+## Install note
+This package intentionally ships without package-lock.json so npm can resolve from the public registry on your machine.

@@ -1,7 +1,7 @@
 <template>
   <div class="hero">
     <div>
-      <div class="kicker">{{ kicker }}</div>
+      <div class="status-pill">{{ kicker }}</div>
       <h2>{{ title }}</h2>
       <p>{{ description }}</p>
     </div>
@@ -13,8 +13,8 @@
 
 <script setup>
 defineProps({
-  kicker: String,
-  title: String,
-  description: String
+  kicker: { type: String, default: "" },
+  title: { type: String, default: "" },
+  description: { type: String, default: "" }
 });
 </script>

@@ -4,7 +4,7 @@
       <div class="brand">
         <div class="brand-mark">BR</div>
         <h1>{{ appName }}</h1>
-        <p>블록형 이력서 관리 서비스 · Vue + Netlify + Neon</p>
+        <p>문서처럼 입력하고, 버전별로 저장하고, 다시 조합해서 쓰는 이력서 관리기</p>
       </div>
 
       <nav class="nav-group">
@@ -25,7 +25,8 @@
 
       <div class="sidebar-foot">
         <p>
-          이 버전은 Vue 정적 프론트와 Netlify Functions API 구조를 전제로 작성되었습니다.
+          좌측 네이비 네비게이션은 유지하고, 본문은 서비스 UI와 문서 입력 UI를
+          분리해서 구성했습니다.
         </p>
       </div>
     </aside>
@@ -43,19 +44,19 @@ const navItems = [
   {
     number: 1,
     title: "내용 블록 관리",
-    description: "프로필과 내용 블록 원재료 관리",
+    description: "기본정보, 내용, 자기소개글을 직접 입력",
     to: "/blocks"
   },
   {
     number: 2,
     title: "이력서 조합 & 저장",
-    description: "블록 선택, 순서 변경, 자기소개서 작성",
+    description: "좌측 제목 선택, 우측 실제 문서 조합",
     to: "/composer"
   },
   {
     number: 3,
     title: "저장된 이력서 관리",
-    description: "제목 중심 버전 목록 관리",
+    description: "수직 리스트, 수정 진입, PDF 출력",
     to: "/resumes"
   }
 ];

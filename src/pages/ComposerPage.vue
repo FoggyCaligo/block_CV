@@ -1,149 +1,199 @@
 <template>
-  <div class="page active">
-    <AdSlot position="top" label="페이지 상단 광고 슬롯" />
+  <div class="page">
+    <AdSlot label="페이지 상단 광고 슬롯" />
 
     <PageHero
-      kicker="Screen 2"
+      kicker="Design Preview · Screen 2"
       title="이력서 조합 & 저장"
-      description="좌측 블록 선택, 우측 이력서 조합, 자기소개서 직접 작성 구조입니다."
+      description="좌측은 제목 목록, 우측은 실제 이력서 문서입니다. 우측은 기존 상세 페이지 역할까지 흡수했고, 기본정보는 여러 버전 중 택 1이 가능합니다."
     >
       <template #actions>
-        <button class="btn secondary">임시저장</button>
-        <button class="btn primary">이력서 저장</button>
+        <button class="btn secondary" @click="handleReset">새 조합 시작</button>
+        <button class="btn primary" @click="handleSave">이력서 저장</button>
       </template>
     </PageHero>
 
     <div class="layout-2col">
       <div class="left-pane">
-        <div class="card">
-          <div class="card-header">
+        <div class="resource-stack">
+          <section class="resource-column">
             <div>
-              <h3>사용 가능한 블록</h3>
-              <p>좌측에서 필요한 블록을 골라 우측 이력서에 추가합니다.</p>
+              <h3>기본정보</h3>
+              <p>여러 버전 중에서 하나를 선택합니다.</p>
             </div>
-            <div class="filter-row">
-              <span class="chip">전체</span>
-              <span class="chip">경력</span>
-              <span class="chip">포트폴리오</span>
-              <span class="chip">언어능력</span>
-            </div>
-          </div>
-
-          <div class="toolbar">
-            <label class="search">
-              <span>🔎</span>
-              <input type="text" placeholder="추가할 블록 검색" />
-            </label>
-          </div>
-
-          <div class="blocks">
-            <article class="block-card">
-              <div class="block-top">
+            <div v-if="state.profiles.length" class="title-list">
+              <div v-for="profile in state.profiles" :key="profile.id" class="title-item">
                 <div>
-                  <h4 class="block-title">기본 프로필</h4>
-                  <p class="block-sub">사진 + 개인정보 · 상단 고정 블록</p>
+                  <strong @click="openPreview('profile', profile)" style="cursor:pointer">{{ profile.title || `기본정보 ${profile.id}` }}</strong>
+                  <span>{{ profile.name || '이름 미입력' }}</span>
                 </div>
-                <button class="btn primary btn-inline">+ 추가</button>
+                <div class="title-item-actions">
+                  <button @click="openPreview('profile', profile)">보기</button>
+                  <button @click="selectComposerProfile(profile.id)">선택</button>
+                </div>
               </div>
-            </article>
+            </div>
+            <div v-else class="empty-content-box">
+              <div>추가된 기본정보 버전이 없습니다.</div>
+              <div>1번 페이지에서 먼저 기본정보 버전을 만들어주세요.</div>
+            </div>
+          </section>
 
-            <BlockCard v-for="block in blocks" :key="block.id" :block="block" mode="select" />
-          </div>
+          <section class="resource-column">
+            <div>
+              <h3>내용</h3>
+              <p>제목만 보고 추가합니다. 제목을 누르면 모달로 상세 내용을 확인할 수 있습니다.</p>
+            </div>
+            <div v-if="state.blocks.length" class="title-list">
+              <div v-for="block in state.blocks" :key="block.id" class="title-item">
+                <div>
+                  <strong @click="openPreview('block', block)" style="cursor:pointer">{{ blockTitle(block) }}</strong>
+                  <span>{{ blockTemplateLabel(block.template) }}</span>
+                </div>
+                <div class="title-item-actions">
+                  <button @click="openPreview('block', block)">보기</button>
+                  <button @click="addBlockToComposer(block.id)">+</button>
+                </div>
+              </div>
+            </div>
+            <div v-else class="empty-content-box">
+              <div>추가된 내용 블록이 없습니다.</div>
+              <div>1번 페이지에서 템플릿으로 블록을 만든 뒤 여기서 추가하세요.</div>
+            </div>
+          </section>
+
+          <section class="resource-column">
+            <div>
+              <h3>자기소개글</h3>
+              <p>우측 문서 안에서 직접 작성합니다.</p>
+            </div>
+            <div class="empty-content-box">
+              <div>자기소개글은 별도 목록을 두지 않고, 우측 실제 문서 안에서 바로 작성합니다.</div>
+            </div>
+          </section>
         </div>
       </div>
 
       <div class="right-pane">
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h3>현재 만들고 있는 이력서</h3>
-              <p>프로필 1개, 내용 블록 여러 개, 자기소개서로 구성합니다.</p>
-            </div>
-          </div>
-
-          <div class="composer-title">
-            <input class="input" value="A회사 제출용 이력서" />
-          </div>
-
-          <div class="section-shell">
-            <h4>1. 사진 + 개인정보</h4>
-            <p>이 영역은 상단 고정이며, 하나의 프로필만 선택됩니다.</p>
-            <div class="slot-fixed">
-              <div class="selected-item">
-                <div>
-                  <strong>기본 프로필</strong>
-                  <span>사진 포함 / GitHub 링크 포함 / 한 줄 소개 포함</span>
-                </div>
-                <button class="small-btn remove">교체</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-shell">
-            <h4>2. 내용 블록</h4>
-            <p>여러 블록을 추가할 수 있으며, 순서를 바꿔 최종 이력서를 구성합니다.</p>
-            <div class="slot-list">
-              <div v-for="item in selectedItems" :key="item.id" class="selected-item">
-                <div>
-                  <strong>{{ item.title }}</strong>
-                  <span>{{ item.display_type }} · 현재 조합에 포함됨</span>
-                </div>
-                <div class="reorder">
-                  <button class="small-btn">↑</button>
-                  <button class="small-btn">↓</button>
-                  <button class="small-btn remove">−</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-shell">
-            <h4>3. 자기소개서</h4>
-            <p>자기소개서는 버전별로 직접 작성합니다.</p>
-            <div class="self-intro-box">
-              <textarea class="textarea">
-지원 동기와 본인의 강점을 해당 제출 목적에 맞게 자연스럽게 연결하는 긴 텍스트가 들어가는 자리입니다. 실제 구현에서는 입력 상태를 local state로 들고 있다가 저장 시 resumes.self_intro_text로 전송하면 됩니다.
-              </textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h3>미리보기</h3>
-              <p>편집 화면 안에서도 최종 PDF에 가까운 결과를 빠르게 확인합니다.</p>
-            </div>
-          </div>
-
-          <div class="preview-tabs">
-            <button class="preview-tab active">편집 보기</button>
-            <button class="preview-tab">미리보기</button>
-          </div>
-
-          <ResumePreview :resume="previewResume" />
-        </div>
+        <ResumeDocument
+          :title="state.composer.title"
+          :profile="selectedProfile"
+          :blocks="selectedBlocks"
+          :self-intro="state.composer.selfIntro"
+          :controls="true"
+          :show-profile-label="true"
+          @update:title="(value) => (state.composer.title = value)"
+          @move-up="(id) => moveComposerBlock(id, 'up')"
+          @move-down="(id) => moveComposerBlock(id, 'down')"
+          @remove="removeBlockFromComposer"
+          @update:selfIntro="(value) => (state.composer.selfIntro = value)"
+        />
       </div>
     </div>
 
-    <AdSlot position="bottom" label="페이지 하단 광고 슬롯" />
+    <PreviewModal
+      :open="previewOpen"
+      :title="previewTitle"
+      :subtitle="previewSubtitle"
+      @close="previewOpen = false"
+    >
+      <template v-if="previewType === 'profile'">
+        <h4>{{ previewPayload?.title || '기본정보' }}</h4>
+        <div class="preview-entry"><strong>이름</strong><p>{{ previewPayload?.name || '미입력' }}</p></div>
+        <div class="preview-entry"><strong>연락처</strong><p>Tel · {{ previewPayload?.tel || '' }}<br />Email · {{ previewPayload?.email || '' }}</p></div>
+        <div class="preview-entry"><strong>거주지역</strong><p>{{ previewPayload?.location || '미입력' }}</p></div>
+      </template>
+      <template v-else-if="previewType === 'block'">
+        <h4>{{ blockTitle(previewPayload) }}</h4>
+        <div class="preview-entry"><strong>형식</strong><p>{{ blockTemplateLabel(previewPayload?.template) }}</p></div>
+        <template v-if="previewPayload?.template === 'basic'">
+          <div class="preview-entry"><strong>소제목</strong><p>{{ previewPayload?.subtitle || '미입력' }}</p></div>
+          <div class="preview-entry"><strong>내용</strong><p>{{ previewPayload?.body || '미입력' }}</p></div>
+        </template>
+        <template v-else-if="previewPayload?.template === 'experience'">
+          <div v-for="item in previewPayload.items" :key="item.id" class="preview-entry">
+            <strong>{{ item.subtitle || '소제목 없음' }}</strong>
+            <p>{{ item.content || '미입력' }}</p>
+          </div>
+        </template>
+        <template v-else-if="['award','certificate','language'].includes(previewPayload?.template)">
+          <div class="preview-entry"><p>표 형식 템플릿입니다. 저장된 행 수: {{ previewPayload?.rows?.length || 0 }}</p></div>
+        </template>
+        <template v-else-if="previewPayload?.template === 'skill'">
+          <div class="preview-entry"><strong>기술 요소</strong><p>{{ previewPayload?.skills?.map((item) => item.label).join(', ') || '미입력' }}</p></div>
+        </template>
+      </template>
+    </PreviewModal>
+
+    <AdSlot label="페이지 하단 광고 슬롯" />
   </div>
 </template>
 
 <script setup>
-import AdSlot from "../components/AdSlot.vue";
-import BlockCard from "../components/BlockCard.vue";
-import PageHero from "../components/PageHero.vue";
-import ResumePreview from "../components/ResumePreview.vue";
-import { blocks, profile } from "../lib/mockData";
+import { computed, ref } from 'vue';
+import AdSlot from '../components/AdSlot.vue';
+import PageHero from '../components/PageHero.vue';
+import PreviewModal from '../components/PreviewModal.vue';
+import ResumeDocument from '../components/ResumeDocument.vue';
+import {
+  state,
+  resetComposer,
+  selectComposerProfile,
+  addBlockToComposer,
+  removeBlockFromComposer,
+  moveComposerBlock,
+  saveComposer,
+  getProfileById,
+  getComposerBlocks
+} from '../lib/store';
 
-const selectedItems = blocks;
-const previewResume = {
-  id: 999,
-  title: "미리보기 이력서",
-  profile,
-  items: blocks,
-  self_intro_text:
-    "지원 동기와 강점을 자연스럽게 연결하는 긴 텍스트가 들어가는 자리입니다."
-};
+const previewOpen = ref(false);
+const previewType = ref('');
+const previewPayload = ref(null);
+const previewTitle = ref('미리보기');
+const previewSubtitle = ref('선택한 항목의 내용을 확인합니다.');
+
+const selectedProfile = computed(() => getProfileById(state.composer.profileId));
+const selectedBlocks = computed(() => getComposerBlocks());
+
+function openPreview(type, payload) {
+  previewType.value = type;
+  previewPayload.value = payload;
+  previewTitle.value = type === 'profile' ? (payload.title || '기본정보') : blockTitle(payload);
+  previewSubtitle.value = type === 'profile' ? '선택 가능한 기본정보 버전입니다.' : blockTemplateLabel(payload.template);
+  previewOpen.value = true;
+}
+
+function blockTitle(block) {
+  if (!block) return '블록';
+  const labels = {
+    basic: block.title || '기본형 블록',
+    experience: block.title || '경력',
+    award: block.title || '수상내역',
+    certificate: block.title || '자격증',
+    language: block.title || '언어능력',
+    skill: block.title || '기술스택'
+  };
+  return labels[block.template] || '블록';
+}
+
+function blockTemplateLabel(template) {
+  return {
+    basic: '제목 + 내용',
+    experience: '소제목 + 내용 반복형',
+    award: '표 형식',
+    certificate: '표 형식',
+    language: '표 형식',
+    skill: '여러 요소 추가형'
+  }[template] || '블록';
+}
+
+function handleSave() {
+  saveComposer();
+  alert('이력서가 저장되었습니다. 저장된 이력서 관리 페이지에서 확인할 수 있습니다.');
+}
+
+function handleReset() {
+  resetComposer();
+}
 </script>
